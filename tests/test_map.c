@@ -59,7 +59,7 @@ int main(void)
         printf("FAIL: IDLE report 2 taken as a pad report\n");
         fails++;
     }
-    /* Probe 3 capture: neutral, triggers and both signed stick pairs. */
+    /* Captured Wukong XInput report: neutral state, triggers and stick axes. */
     unsigned char x[20] = {0, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                            0x10, 0x1c, 0x30, 0x64, 0, 0x10};
     assert(usbpad_parse_xinput(x, 20, &st));
