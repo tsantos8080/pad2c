@@ -3,6 +3,7 @@
 #include "usbpad.h"
 
 #include <stdio.h>
+#include <assert.h>
 
 static int fails;
 
@@ -58,6 +59,27 @@ int main(void)
         printf("FAIL: IDLE report 2 taken as a pad report\n");
         fails++;
     }
+    /* Probe 3 capture: neutral, triggers and both signed stick pairs. */
+    unsigned char x[20] = {0, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                           0x10, 0x1c, 0x30, 0x64, 0, 0x10};
+    assert(usbpad_parse_xinput(x, 20, &st));
+    assert(st.buttons == 0 && st.lx == 128 && st.ly == 128 && st.rx == 128 && st.ry == 128);
+    const uint32_t xb[16] = {PAD_UP, PAD_DOWN, PAD_LEFT, PAD_RIGHT, PAD_OPTIONS,
+        PAD_CREATE, PAD_L3, PAD_R3, PAD_L1, PAD_R1, PAD_PS, 0,
+        PAD_CROSS, PAD_CIRCLE, PAD_SQUARE, PAD_TRIANGLE};
+    for (int i = 0; i < 16; i++) {
+        x[2] = (1u << i) & 255; x[3] = (1u << i) >> 8;
+        assert(usbpad_parse_xinput(x, 20, &st) && st.buttons == xb[i]);
+    }
+    x[2] = x[3] = 0; x[4] = 255; x[5] = 24;
+    x[6] = 0; x[7] = 0x80; x[8] = 255; x[9] = 0x7f;
+    x[10] = 255; x[11] = 0x7f; x[12] = 0; x[13] = 0x80;
+    assert(usbpad_parse_xinput(x, 20, &st));
+    assert(st.buttons == PAD_L2 && st.l2 == 255 && st.r2 == 24);
+    assert(st.lx == 0 && st.ly == 0 && st.rx == 255 && st.ry == 255);
+    for (int n = 0; n < 20; n++) assert(!usbpad_parse_xinput(x, n, &st));
+    x[0] = 1; assert(!usbpad_parse_xinput(x, 20, &st));
+    x[0] = 0; x[1] = 0x13; assert(!usbpad_parse_xinput(x, 20, &st));
     printf("%s (%d failure(s))\n", fails ? "FAILED" : "all passed", fails);
     return fails != 0;
 }

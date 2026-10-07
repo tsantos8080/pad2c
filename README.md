@@ -139,3 +139,13 @@ GPL-3.0-or-later. See [LICENSE](LICENSE).
 
 No Sony code, keys or firmware are part of this project. pad2c does not jailbreak anything: it needs a console
 that already runs a payload loader.
+
+### Ultimate 2C Wukong XInput (experimental, 0.2.2)
+
+Supports active dongle `2dc8:310a`, interface 0 (`ff/5d/01`), IN `0x84`
+and OUT `0x05`. Sends `01 03 0e` once, as validated by probe 3 on PS5
+13.60, then maps 20-byte Xbox 360 reports. Idle `2dc8:301c` is skipped.
+L4/R4 touchpad mapping is not yet established for this XInput mode.
+Use a second console user for the virtual controller. No physical controller
+disconnection is performed. The main payload was reported working by the user
+on PS5 firmware 13.60.

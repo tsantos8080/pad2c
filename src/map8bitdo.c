@@ -42,3 +42,34 @@ int usbpad_parse_8bitdo(const unsigned char *r, int n, pad_state *st)
     if (st->r2 > 24) st->buttons |= PAD_R2;
     return 1;
 }
+
+/* Xbox 360 format captured from 2dc8:310a after enable 01 03 0e. */
+static unsigned char xaxis(const unsigned char *r, int invert)
+{
+    int v = (int)r[0] | (int)r[1] << 8;
+    if (v >= 32768) v -= 65536;
+    v = (32768 + (invert ? -v : v)) / 256;
+    return (unsigned char)(v > 255 ? 255 : v);
+}
+
+int usbpad_parse_xinput(const unsigned char *r, int n, pad_state *st)
+{
+    static const uint32_t bits[16] = {
+        PAD_UP, PAD_DOWN, PAD_LEFT, PAD_RIGHT, PAD_OPTIONS, PAD_CREATE,
+        PAD_L3, PAD_R3, PAD_L1, PAD_R1, PAD_PS, 0,
+        PAD_CROSS, PAD_CIRCLE, PAD_SQUARE, PAD_TRIANGLE,
+    };
+    unsigned buttons;
+    int i;
+    if (n < 20 || r[0] != 0 || r[1] != 0x14) return 0;
+    pad_state_reset(st);
+    buttons = (unsigned)r[2] | (unsigned)r[3] << 8;
+    for (i = 0; i < 16; i++)
+        if (buttons & (1u << i)) st->buttons |= bits[i];
+    st->l2 = r[4]; st->r2 = r[5];
+    if (st->l2 > 24) st->buttons |= PAD_L2;
+    if (st->r2 > 24) st->buttons |= PAD_R2;
+    st->lx = xaxis(r + 6, 0); st->ly = xaxis(r + 8, 1);
+    st->rx = xaxis(r + 10, 0); st->ry = xaxis(r + 12, 1);
+    return 1;
+}
