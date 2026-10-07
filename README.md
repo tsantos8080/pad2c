@@ -140,7 +140,7 @@ GPL-3.0-or-later. See [LICENSE](LICENSE).
 No Sony code, keys or firmware are part of this project. pad2c does not jailbreak anything: it needs a console
 that already runs a payload loader.
 
-### Ultimate 2C Wukong XInput (experimental, 0.2.2)
+### Ultimate 2C Wukong XInput (experimental)
 
 Supports active dongle `2dc8:310a`, interface 0 (`ff/5d/01`), IN `0x84`
 and OUT `0x05`. Sends `01 03 0e` once, as validated by probe 3 on PS5
