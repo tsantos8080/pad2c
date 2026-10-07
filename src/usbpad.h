@@ -1,5 +1,13 @@
-/* Reads supported 8BitDo HID and Ultimate 2C XInput USB interfaces.
- * The idle dongle is skipped; re-enumeration causes close and rescan. */
+/* A USB gamepad read straight from its /dev/ugenB.A node, beside the
+ * console's own HID driver (which holds the interface but does nothing with
+ * a device it does not know).
+ *
+ * Today: the 8BitDo 2.4G dongle (2dc8:301c). With no controller it shows up
+ * as "8BitDo IDLE" and sends nothing useful; when the controller connects it
+ * enumerates again as "8BitDo Ultimate 2C Wireless Controller" and sends
+ * report 1 (see usbpad.c). The Wukong model uses XInput (2dc8:310a).
+ * Every re-enumeration ends the open device, so the caller closes it and looks again.
+ */
 #ifndef PAD2C_USBPAD_H
 #define PAD2C_USBPAD_H
 
@@ -18,7 +26,9 @@ void usbpad_close(usbpad *u);
 const char *usbpad_name(const usbpad *u);
 
 /* The 8BitDo report 1 to a DualSense state. Returns 0 if it is not one. */
-int usbpad_parse_xinput(const unsigned char *r, int n, pad_state *st);
 int usbpad_parse_8bitdo(const unsigned char *r, int n, pad_state *st);
+
+/* An XInput report to a DualSense state. Returns 0 if it is not one. */
+int usbpad_parse_xinput(const unsigned char *r, int n, pad_state *st);
 
 #endif
